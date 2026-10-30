@@ -504,7 +504,12 @@ export const make = Effect.fn("SimlockDeviceHost.make")(function* (
         lease.dir,
         `screenshot-${(yield* Random.nextIntBetween(0, 0xffffff)).toString(16)}.png`,
       );
-      yield* agentDevice(lease, ["screenshot", file]);
+      // agent-device saves iOS at 1x points by default; the panel's stream shows device pixels.
+      yield* agentDevice(lease, [
+        "screenshot",
+        file,
+        ...(lease.platform === "ios" ? ["--native-density"] : []),
+      ]);
       return yield* fs
         .readFile(file)
         .pipe(Effect.ensuring(fs.remove(file, { force: true }).pipe(Effect.ignore)));

@@ -237,12 +237,18 @@ describe("Simlock device host", () => {
       expect([...(yield* ready.devices.screenshot({ ...catalog[1]!, id: leaseId }))]).toEqual([
         1, 2, 3,
       ]);
+      expect(pool.ran("screenshot").at(-1)!.args).not.toContain("--native-density");
+      const iosLeaseId = yield* ready.devices.boot(catalog[0]!, { workspaceRoot: workspace });
+      yield* ready.devices.screenshot({ ...catalog[0]!, id: iosLeaseId });
+      expect(pool.ran("screenshot").at(-1)!.args).toContain("--native-density");
+      yield* ready.devices.shutdown({ id: iosLeaseId, platform: "ios" });
+      expect(pool.ran("close")).toHaveLength(1);
 
       yield* ready.devices.shutdown({ id: leaseId, platform: "android" });
-      expect(pool.ran("close")).toHaveLength(1);
+      expect(pool.ran("close")).toHaveLength(2);
       expect((yield* ready.devices.list).devices.some((device) => device.booted)).toBe(false);
       yield* Scope.close(scope, Exit.void);
-      expect(pool.ran("close")).toHaveLength(1);
+      expect(pool.ran("close")).toHaveLength(2);
     }).pipe(Effect.scoped, Effect.provide(layer)),
   );
 
