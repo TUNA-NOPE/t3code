@@ -756,7 +756,7 @@ export const make = Effect.fn("EasDeviceHost.make")(function* (config: EasDevice
             .pipe(
               Effect.flatMap(HttpClientResponse.filterStatusOk),
               Effect.flatMap((response) => response.arrayBuffer),
-              Effect.map((buffer) => new Uint8Array(buffer)),
+              Effect.map((buffer) => ({ png: new Uint8Array(buffer) })),
               Effect.scoped,
               Effect.timeout(PREVIEW_TIMEOUT),
               Effect.mapError(

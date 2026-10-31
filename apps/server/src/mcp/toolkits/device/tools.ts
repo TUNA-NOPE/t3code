@@ -70,7 +70,7 @@ const DeviceOpenTool = Tool.make("device_open", {
 
 export const DeviceScreenshotTool = Tool.make("device_screenshot", {
   description:
-    "Get a PNG of an open device's screen. For taps and text, use the `agent-device` CLI.",
+    "Get a PNG of an open device's screen at its own pixels. For taps and text, use the `agent-device` CLI, whose coordinates are `pointSize` where it is given, not the image's pixels.",
   parameters: DeviceToolTargetInput,
   success: DeviceToolScreenshotResult,
   failure: DeviceToolFailure,

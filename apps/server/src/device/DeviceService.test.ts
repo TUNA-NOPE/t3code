@@ -1699,7 +1699,7 @@ describe("locating a device id across hosts", () => {
         boot: (device) => Effect.succeed(device.id),
         attach: () => Effect.void,
         shutdown: () => Effect.void,
-        screenshot: () => Effect.succeed(new Uint8Array()),
+        screenshot: () => Effect.succeed({ png: new Uint8Array() }),
       },
       // Opening an emulator checks its host for ffmpeg's H.264 encoder.
       run: () => Effect.succeed({ code: 0, stdout: " V....D libx264", stderr: "" }),

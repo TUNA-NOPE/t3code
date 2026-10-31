@@ -68,7 +68,7 @@ export function agentDeviceQuickStart(
     `  ${run('fill @e5 "text" --settle')}`,
     `  ${run("alert accept")}`,
     `  ${run("settings appearance dark")}  # also text-size, permission grant <name>`,
-    `  ${run("screenshot /tmp/shot.png")}  # ${device.platform === "ios" ? "iOS saves 1x points; add --pixel-density <n> (3 on most iPhones) for device resolution, " : ""}or call device_screenshot to look`,
+    `  ${run("screenshot /tmp/shot.png")}  # ${device.platform === "ios" ? "iOS saves 1x points, the units of tap coordinates; add --native-density for the device's pixels, " : ""}or call device_screenshot to look`,
     `  ${run("record start --scope device /tmp/run.mp4")}  # then record stop`,
     `  ${run("install <app> <path-to-.app-or-.apk>")}`,
     `Prefer snapshot refs over coordinates. Run ${executable} help <command> for flags and ${executable} help workflow for guides.`,
@@ -298,6 +298,7 @@ const handlers = {
           mimeType: "image/png" as const,
           data: Buffer.from(shot.png).toString("base64"),
           ...pngDimensions(shot.png),
+          ...(shot.pointSize ? { pointSize: shot.pointSize } : {}),
         },
       };
     }).pipe(Effect.mapError(toolError)),

@@ -117,7 +117,10 @@ const fakePool = (
           }
           if (command === "screenshot") yield* fs.writeFile(args[1]!, new Uint8Array([1, 2, 3]));
           return {
-            stdout: "{}",
+            stdout:
+              command === "screenshot" && args.includes("--native-density")
+                ? JSON.stringify({ data: { logicalWidth: 402, logicalHeight: 874 } })
+                : "{}",
             stderr: "",
             code: ChildProcessSpawner.ExitCode(0),
             timedOut: false,
@@ -234,13 +237,14 @@ describe("Simlock device host", () => {
           new URLSearchParams({ device: "lease-2" }),
         ),
       ).toBeNull();
-      expect([...(yield* ready.devices.screenshot({ ...catalog[1]!, id: leaseId }))]).toEqual([
+      expect([...(yield* ready.devices.screenshot({ ...catalog[1]!, id: leaseId })).png]).toEqual([
         1, 2, 3,
       ]);
       expect(pool.ran("screenshot").at(-1)!.args).not.toContain("--native-density");
       const iosLeaseId = yield* ready.devices.boot(catalog[0]!, { workspaceRoot: workspace });
-      yield* ready.devices.screenshot({ ...catalog[0]!, id: iosLeaseId });
+      const shot = yield* ready.devices.screenshot({ ...catalog[0]!, id: iosLeaseId });
       expect(pool.ran("screenshot").at(-1)!.args).toContain("--native-density");
+      expect(shot.pointSize).toEqual({ width: 402, height: 874 });
       yield* ready.devices.shutdown({ id: iosLeaseId, platform: "ios" });
       expect(pool.ran("close")).toHaveLength(1);
 

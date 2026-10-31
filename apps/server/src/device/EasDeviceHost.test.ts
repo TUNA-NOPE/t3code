@@ -323,7 +323,9 @@ describe("EAS Simulator host", () => {
       expect(yield* ready.devices.agentEndpoint!("session-2")).toMatchObject({
         agentDeviceId: "emulator-5554",
       });
-      expect(Array.from(yield* ready.devices.screenshot(running!))).toEqual([137, 80, 78, 71]);
+      expect(Array.from((yield* ready.devices.screenshot(running!)).png)).toEqual([
+        137, 80, 78, 71,
+      ]);
       expect(expo.previews.slice(-2)).toEqual([
         "/vendor/serve-emu/api",
         "/vendor/serve-emu/api/screenshot?device=emulator-5554",

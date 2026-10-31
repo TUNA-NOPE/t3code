@@ -101,9 +101,8 @@ const sshProbeFailureMessage = (error: DeviceHost.DeviceHostError): string => {
   return `Connected over SSH, but the device host check failed (exit code ${cause.exitCode}).`;
 };
 
-export interface DeviceScreenshot {
+export interface DeviceScreenshot extends DeviceHost.HostScreenshot {
   readonly device: DeviceSummary;
-  readonly png: Uint8Array;
 }
 
 export interface DeviceReadiness extends DeviceHost.DeviceHostReady {
@@ -950,7 +949,7 @@ export const makeWithHosts = Effect.fn("DeviceService.makeWithHosts")(function* 
   const screenshot: DeviceService["Service"]["screenshot"] = Effect.fn("DeviceService.screenshot")(
     function* (input) {
       const { ready, device } = yield* resolveDevice(input.hostId, input.deviceId);
-      return { device, png: yield* ready.devices.screenshot(device) };
+      return { device, ...(yield* ready.devices.screenshot(device)) };
     },
   );
 

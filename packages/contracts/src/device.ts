@@ -678,6 +678,12 @@ export const DeviceToolScreenshotResult = Schema.Struct({
     data: Schema.String,
     width: Schema.Int,
     height: Schema.Int,
+    pointSize: Schema.optional(
+      Schema.Struct({ width: Schema.Number, height: Schema.Number }).annotate({
+        description:
+          "The screen in agent-device's tap coordinates, where they differ from the image's pixels.",
+      }),
+    ),
   }),
 });
 export type DeviceToolScreenshotResult = typeof DeviceToolScreenshotResult.Type;

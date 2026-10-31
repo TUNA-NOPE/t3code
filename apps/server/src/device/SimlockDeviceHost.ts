@@ -58,6 +58,16 @@ const decodeCatalog = Schema.decodeUnknownEffect(Catalog);
 const decodeSessionRecord = Schema.decodeUnknownEffect(
   Schema.fromJsonString(Schema.Struct({ leaseId: Schema.String })),
 );
+const decodeScreenshotData = Schema.decodeUnknownOption(
+  Schema.fromJsonString(
+    Schema.Struct({
+      data: Schema.Struct({
+        logicalWidth: Schema.optional(Schema.Number),
+        logicalHeight: Schema.optional(Schema.Number),
+      }),
+    }),
+  ),
+);
 const decodeCliFailure = Schema.decodeUnknownOption(
   Schema.fromJsonString(
     Schema.Struct({
@@ -505,14 +515,22 @@ export const make = Effect.fn("SimlockDeviceHost.make")(function* (
         `screenshot-${(yield* Random.nextIntBetween(0, 0xffffff)).toString(16)}.png`,
       );
       // agent-device saves iOS at 1x points by default; the panel's stream shows device pixels.
-      yield* agentDevice(lease, [
+      const stdout = yield* agentDevice(lease, [
         "screenshot",
         file,
         ...(lease.platform === "ios" ? ["--native-density"] : []),
       ]);
-      return yield* fs
+      const png = yield* fs
         .readFile(file)
         .pipe(Effect.ensuring(fs.remove(file, { force: true }).pipe(Effect.ignore)));
+      const data = Option.map(decodeScreenshotData(stdout), (decoded) => decoded.data);
+      return Option.match(data, {
+        onNone: () => ({ png }),
+        onSome: ({ logicalWidth, logicalHeight }) =>
+          logicalWidth !== undefined && logicalHeight !== undefined
+            ? { png, pointSize: { width: logicalWidth, height: logicalHeight } }
+            : { png },
+      });
     },
     Effect.mapError(operationError("screenshot")),
   );

@@ -103,6 +103,12 @@ export interface HubUpstream {
 }
 
 /** Discovery and lifecycle for the devices a ready host can run. */
+export interface HostScreenshot {
+  readonly png: Uint8Array;
+  /** The screen in the units agent-device taps in, where they differ from the PNG's pixels. */
+  readonly pointSize?: { readonly width: number; readonly height: number };
+}
+
 export interface DeviceOperations {
   readonly list: Effect.Effect<
     {
@@ -127,7 +133,7 @@ export interface DeviceOperations {
     readonly id: string;
     readonly platform: DevicePlatform;
   }) => Effect.Effect<void, DeviceOperationError>;
-  readonly screenshot: (device: HostDevice) => Effect.Effect<Uint8Array, DeviceOperationError>;
+  readonly screenshot: (device: HostDevice) => Effect.Effect<HostScreenshot, DeviceOperationError>;
   /**
    * For hosts that run one agent-device daemon per device instead of one per
    * host. `agentDeviceId` is the id agent-device selects the device by, when
